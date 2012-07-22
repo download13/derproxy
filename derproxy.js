@@ -2,6 +2,7 @@ var net = require('net');
 var fs = require('fs');
 
 var configFile = process.argv[2] || 'config.json';
+var config = {};
 var router = {};
 var matchers = [];
 
@@ -10,7 +11,8 @@ function loadConfigFile(cb) {
 	fs.readFile(configFile, 'utf8', function(err, data) {
 		if(err) return console.error(err);
 		
-		router = JSON.parse(data);
+		config = JSON.parse(data);
+		router = config.router;
 		matchers = Object.keys(router).map(function(domain) {
 			return new RegExp('\\shost:\\s*(' + domain + ')\\s');
 		});
@@ -56,7 +58,8 @@ var app = net.createServer(function(c) {
 });
 
 loadConfigFile(function() {
-	var port = configFile.port || 80;
+	var port = config.port || 80;
+	console.log('Trying to listen on port', port);
 	app.listen(port, function() {
 		console.log('derproxy listening on port', port);
 	});
