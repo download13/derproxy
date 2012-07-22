@@ -53,6 +53,8 @@ var app = net.createServer(function(c) {
 				return;
 			}
 		}
+		
+		c.end('HTTP/1.1 504 Gateway Timeout\n\nGateway Timeout');
 	}
 	c.on('data', ondata);
 });
