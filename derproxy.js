@@ -2,11 +2,11 @@ var net = require('net');
 var fs = require('fs');
 
 var configFile = process.argv[2] || 'config.json';
-
 var router = {};
 var matchers = [];
 
-function reloadConfigFile() {
+function loadConfigFile(cb) {
+	console.log('Loading config file');
 	fs.readFile(configFile, 'utf8', function(err, data) {
 		if(err) return console.error(err);
 		
@@ -14,10 +14,13 @@ function reloadConfigFile() {
 		matchers = Object.keys(router).map(function(domain) {
 			return new RegExp('\\shost:\\s*(' + domain + ')\\s');
 		});
+		
+		cb && cb();
 	});
 }
-fs.watch(configFile, reloadConfigFile);
-reloadConfigFile();
+fs.watch(configFile, function(event, file) {
+	loadConfigFile();
+});
 
 var app = net.createServer(function(c) {
 	var blob;
@@ -51,7 +54,11 @@ var app = net.createServer(function(c) {
 	}
 	c.on('data', ondata);
 });
-app.listen(80);
+
+loadConfigFile(function() {
+	app.listen(configFile.port || 80);
+});
+
 
 process.on('uncaughtException', function(err) {
 	console.error(err);
