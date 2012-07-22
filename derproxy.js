@@ -56,7 +56,10 @@ var app = net.createServer(function(c) {
 });
 
 loadConfigFile(function() {
-	app.listen(configFile.port || 80);
+	var port = configFile.port || 80;
+	app.listen(port, function() {
+		console.log('derproxy listening on port', port);
+	});
 });
 
 
