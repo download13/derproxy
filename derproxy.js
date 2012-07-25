@@ -44,10 +44,18 @@ var app = net.createServer(function(c) {
 				});
 				dest.on('error', function(err) {
 					if(err.code == 'ECONNREFUSED') {
+						dest.end();
 						c.end('HTTP/1.1 503 Application Unavailable\n\nApplication Unavailable');
 					} else {
 						console.log(err.stack);
+						c.end();
+						dest.end();
 					}
+				});
+				c.on('error', function(err) {
+					console.log(err, err.stack);
+					c.end();
+					dest.end();
 				});
 				
 				return;
@@ -69,6 +77,6 @@ loadConfigFile(function() {
 
 
 process.on('uncaughtException', function(err) {
-	console.error(err);
+	console.error('uncaught', err);
 	console.error(err.stack);
 });
